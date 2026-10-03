@@ -1,0 +1,993 @@
+<meta charset="utf-8">
+<title>中村悠希 自己紹介ムービー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Klee+One:wght@600&display=swap">
+<style>
+/* 16:9 の画面を1つ置き、その中で8つの場面を時間で切り替える。サイトと同じ配色 */
+:root {
+  --page: #11173a;
+  --page-fg: #eef0ff;
+  --text: #1f3134;
+  --c1: #3a5bff;
+  --c2: #b03aff;
+  --yellow: #ffd23f;
+  --pink: #ff5c8a;
+  --mint: #1fc8a9;
+  --orange: #ff8a3d;
+  --navy: #1b2559;
+  --cream: #fff7dc;
+  --sky: #e6eeff;
+  --lilac: #f1ebff;
+  --board: #2b4a3d;
+  --wood: #8b6340;
+  --chalk: #f3f1e7;
+  --white: #ffffff;
+  --sans: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --hand: "Klee One", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--page);
+  color: var(--page-fg);
+  font-family: var(--sans);
+  padding-inline: 16px;
+  padding-block: 24px 40px;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-wrap: balance;
+}
+
+.page-title span {
+  color: var(--yellow);
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+/* ===== 画面（ステージ） ===== */
+.stage {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--navy);
+  container-type: inline-size;
+  color: var(--text);
+  letter-spacing: 0.06em;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1.6cqw;
+  padding: 4cqw;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.03);
+  transition: opacity 0.5s, transform 0.6s, visibility 0s 0.5s;
+}
+
+.stage[data-scene="1"] .s1,
+.stage[data-scene="2"] .s2,
+.stage[data-scene="3"] .s3,
+.stage[data-scene="4"] .s4,
+.stage[data-scene="5"] .s5,
+.stage[data-scene="6"] .s6,
+.stage[data-scene="7"] .s7,
+.stage[data-scene="8"] .s8 {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.5s, transform 0.6s, visibility 0s;
+}
+
+/* 場面が始まったら、中の要素が順に出てくる（--d が待ち時間） */
+.stage[data-scene="1"] .s1 .in,
+.stage[data-scene="2"] .s2 .in,
+.stage[data-scene="3"] .s3 .in,
+.stage[data-scene="4"] .s4 .in,
+.stage[data-scene="5"] .s5 .in,
+.stage[data-scene="6"] .s6 .in,
+.stage[data-scene="7"] .s7 .in,
+.stage[data-scene="8"] .s8 .in {
+  animation: up 0.7s var(--d, 0s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.stage .in.zoom { animation-name: zoom !important; }
+
+.stage.paused *,
+.stage.paused *::before,
+.stage.paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* 共通パーツ */
+.pill {
+  display: inline-block;
+  font-family: var(--hand);
+  font-weight: 600;
+  font-size: 1.6cqw;
+  line-height: 1;
+  padding: 0.8cqw 1.8cqw;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--text);
+}
+
+.big {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+}
+
+.sub {
+  margin: 0;
+  font-size: 2cqw;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+/* 花丸 */
+.hanamaru path {
+  fill: none;
+  stroke: var(--yellow);
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.stage[data-scene="1"] .s1 .hanamaru path,
+.stage[data-scene="6"] .s6 .hanamaru path,
+.stage[data-scene="8"] .s8 .hanamaru path {
+  animation: draw 1.2s var(--d, 0s) cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+/* ===== 1：オープニング ===== */
+.s1 {
+  color: var(--white);
+  background:
+    radial-gradient(45% 55% at 12% 20%, rgba(31, 200, 169, 0.45), transparent 70%),
+    radial-gradient(40% 50% at 90% 10%, rgba(255, 92, 138, 0.45), transparent 70%),
+    radial-gradient(50% 60% at 80% 100%, rgba(255, 210, 63, 0.35), transparent 70%),
+    linear-gradient(135deg, var(--c1), #7a3dff 55%, var(--c2));
+  grid-template-columns: auto auto;
+  gap: 4cqw;
+  text-align: left;
+}
+
+.s1 .hanamaru {
+  width: 26cqw;
+  height: 26cqw;
+}
+
+.s1 .hanamaru path { stroke-width: 2.2; }
+.s1 .hanamaru .petal { --d: 1s; }
+
+.s1 .hello {
+  margin: 0;
+  font-size: 2.6cqw;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
+.s1 .big {
+  font-size: 9cqw;
+}
+
+.s1 .roman {
+  margin: 0;
+  font-size: 1.5cqw;
+  font-weight: 500;
+  letter-spacing: 0.5em;
+}
+
+.shape {
+  position: absolute;
+  animation: float 5s ease-in-out infinite;
+}
+
+.shape.circle { top: 9%; left: 6%; width: 6cqw; height: 6cqw; border-radius: 50%; background: var(--pink); }
+.shape.ring   { bottom: 10%; right: 7%; width: 7cqw; height: 7cqw; border-radius: 50%; border: 0.9cqw solid var(--mint); animation-delay: -2s; }
+.shape.tri    { bottom: 8%; left: 18%; width: 0; height: 0; border-left: 2.6cqw solid transparent; border-right: 2.6cqw solid transparent; border-bottom: 4.4cqw solid var(--yellow); animation-delay: -3s; }
+
+/* ===== 2：所属 ===== */
+.s2 {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 3.4cqw, rgba(58, 91, 255, 0.08) 3.4cqw calc(3.4cqw + 1px)),
+    var(--cream);
+}
+
+.s2 .pill { background: var(--yellow); }
+.s2 .big { font-size: 6.4cqw; }
+.s2 .major { font-size: 3.4cqw; font-weight: 700; margin: 0; letter-spacing: 0.15em; }
+
+.age {
+  display: grid;
+  place-items: center;
+  width: 12cqw;
+  height: 12cqw;
+  border-radius: 50%;
+  background: var(--pink);
+  color: var(--white);
+  font-weight: 900;
+  font-size: 4.4cqw;
+  line-height: 1;
+  rotate: -8deg;
+  position: absolute;
+  right: 12%;
+  top: 16%;
+  box-shadow: 0 0.6cqw 0 rgba(31, 49, 52, 0.15);
+}
+
+.age small { font-size: 1.6cqw; font-weight: 700; display: block; }
+
+/* ===== 3：80か所 ===== */
+.s3 {
+  background: var(--navy);
+  color: var(--white);
+  grid-template-columns: auto auto;
+  column-gap: 6cqw;
+  text-align: left;
+}
+
+.s3 .pill { background: var(--mint); color: var(--white); }
+
+.count {
+  margin: 1cqw 0 0;
+  font-weight: 300;
+  font-size: 17cqw;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(120deg, var(--yellow), var(--pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.count-unit {
+  font-size: 3cqw;
+  font-weight: 700;
+  color: var(--white);
+  margin-left: 1cqw;
+  -webkit-text-fill-color: var(--white);
+}
+
+.s3 .sub { font-size: 1.8cqw; color: rgba(255, 255, 255, 0.8); }
+
+.dots {
+  width: 30cqw;
+  max-width: 100%;
+  aspect-ratio: 10 / 8;
+  background: linear-gradient(120deg, var(--mint), var(--c1), var(--c2), var(--pink), var(--yellow));
+  -webkit-mask: radial-gradient(circle, #000 32%, transparent 34%) 0 0 / 10% 12.5%;
+  mask: radial-gradient(circle, #000 32%, transparent 34%) 0 0 / 10% 12.5%;
+}
+
+.stage[data-scene="3"] .s3 .dots {
+  animation: rows 2s 0.3s steps(8) both;
+}
+
+.s3 .foot {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 2cqw;
+  font-size: 2.2cqw;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.s3 .foot b { color: var(--yellow); }
+
+/* ===== 4：強み ===== */
+.s4 { background: var(--lilac); }
+
+.s4 .big { font-size: 4.6cqw; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2cqw;
+  width: 84cqw;
+  margin-top: 1.4cqw;
+}
+
+.card {
+  border-radius: 1.8cqw;
+  padding: 2.6cqw 2cqw;
+  color: var(--white);
+  text-align: left;
+  box-shadow: 0 0.6cqw 0 rgba(31, 49, 52, 0.15);
+}
+
+.card:nth-child(1) { background: var(--c1); }
+.card:nth-child(2) { background: var(--pink); }
+.card:nth-child(3) { background: var(--mint); }
+
+.card b {
+  display: block;
+  font-size: 3.6cqw;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.card span {
+  display: block;
+  margin-top: 0.8cqw;
+  font-size: 1.6cqw;
+  line-height: 1.6;
+  opacity: 0.92;
+}
+
+/* ===== 5：ランニング ===== */
+.s5 {
+  background: linear-gradient(180deg, #dff4ff, #e9fbf5);
+  align-content: start;
+  padding-top: 5cqw;
+}
+
+.s5 .pill { background: var(--c1); color: var(--white); }
+.s5 .big { font-size: 5cqw; }
+.s5 .sub { font-size: 1.9cqw; }
+
+.run-text {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  white-space: nowrap;
+  font-size: 11cqw;
+  font-weight: 900;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(106, 75, 255, 0.3);
+  animation: slide 6s linear infinite;
+}
+
+.run-lines span {
+  position: absolute;
+  height: 0.3cqw;
+  width: 6cqw;
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  opacity: 0.6;
+  animation: speedLine 0.6s linear infinite;
+}
+
+.run-lines span:nth-child(1) { top: 52%; }
+.run-lines span:nth-child(2) { top: 64%; width: 9cqw; animation-delay: -0.2s; }
+.run-lines span:nth-child(3) { top: 76%; width: 4cqw; animation-delay: -0.4s; }
+
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  height: 0.35cqw;
+  background: repeating-linear-gradient(90deg, var(--mint) 0 3cqw, transparent 3cqw 6cqw);
+  background-size: 6cqw 100%;
+  animation: ground 0.25s linear infinite;
+}
+
+.runner {
+  position: absolute;
+  left: 50%;
+  bottom: calc(9% - 0.3cqw);
+  width: 20cqw;
+  height: 23.3cqw;
+  margin-left: -10cqw;
+  overflow: visible;
+}
+
+.runner line { stroke: var(--text); stroke-width: 7; stroke-linecap: round; }
+.runner .torso { stroke-width: 9; }
+.runner .head { fill: var(--c2); }
+.runner .back line { stroke: #8a979a; }
+
+.body-bob { animation: bob 0.3s ease-in-out infinite; }
+.leg { transform-origin: 56px 74px; }
+.leg .shin { transform-origin: 56px 99px; }
+.arm { transform-origin: 65px 42px; }
+.leg-a { animation: thigh 0.6s linear infinite; }
+.leg-a .shin { animation: shin 0.6s linear infinite; }
+.leg-b { animation: thigh 0.6s -0.3s linear infinite; }
+.leg-b .shin { animation: shin 0.6s -0.3s linear infinite; }
+.arm-a { animation: arm 0.6s ease-in-out infinite; }
+.arm-b { animation: arm 0.6s -0.3s ease-in-out infinite; }
+
+/* ===== 6：謎解き ===== */
+.s6 {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 3.4cqw, rgba(58, 91, 255, 0.07) 3.4cqw calc(3.4cqw + 1px)),
+    #fffdf4;
+}
+
+.s6 .pill { background: var(--pink); color: var(--white); }
+.s6 .q { margin: 0; font-size: 2.6cqw; font-weight: 700; }
+
+.q-num {
+  font-family: var(--hand);
+  border: 1px solid var(--text);
+  padding: 0 1cqw;
+  margin-right: 1cqw;
+}
+
+.tiles {
+  display: flex;
+  gap: 0.9cqw;
+  margin-top: 1cqw;
+}
+
+.tiles span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 6.4cqw;
+  height: 6.4cqw;
+  border: 2px solid var(--text);
+  background: var(--white);
+  font-family: var(--hand);
+  font-weight: 600;
+  font-size: 3.4cqw;
+  line-height: 1;
+}
+
+.tiles .out::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: 50%;
+  height: 0.35cqw;
+  background: var(--pink);
+  transform: rotate(-35deg) scaleX(0);
+}
+
+.stage[data-scene="6"] .s6 .tiles .out {
+  animation: fadeTile 0.4s 1.9s both;
+}
+
+.stage[data-scene="6"] .s6 .tiles .out::after {
+  animation: strike 0.35s 1.6s both;
+}
+
+.answer {
+  position: relative;
+  margin: 1.6cqw 0 0;
+  font-size: 3.6cqw;
+  font-weight: 900;
+}
+
+.answer em {
+  font-style: normal;
+  color: var(--pink);
+}
+
+.s6 .hanamaru {
+  position: absolute;
+  right: 9%;
+  top: 8%;
+  width: 15cqw;
+  height: 15cqw;
+}
+
+.s6 .hanamaru path { stroke: var(--c2); stroke-width: 3; }
+
+
+/* ===== 7：座右の銘 ===== */
+.s7 {
+  background:
+    radial-gradient(circle, rgba(58, 91, 255, 0.14) 2px, transparent 2.5px) 0 0 / 2.2cqw 2.2cqw,
+    var(--sky);
+}
+
+.board {
+  position: relative;
+  width: 84cqw;
+  padding: 6cqw 4cqw 7cqw;
+  border: 1.2cqw solid var(--wood);
+  border-radius: 0.6cqw;
+  background:
+    radial-gradient(40% 50% at 20% 30%, rgba(255, 255, 255, 0.06), transparent 70%),
+    var(--board);
+  color: var(--chalk);
+  font-family: var(--hand);
+  box-shadow: inset 0 0 5cqw rgba(0, 0, 0, 0.35), 0 2cqw 4cqw rgba(27, 37, 89, 0.25);
+}
+
+.board-label {
+  position: absolute;
+  top: 2cqw;
+  left: 2.6cqw;
+  margin: 0;
+  font-size: 1.5cqw;
+  opacity: 0.8;
+}
+
+.board p.line {
+  margin: 0;
+  font-weight: 600;
+  font-size: 3.8cqw;
+  line-height: 1.9;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.board em {
+  font-style: normal;
+  color: var(--yellow);
+  text-decoration: underline wavy rgba(255, 210, 63, 0.85);
+  text-underline-offset: 0.9cqw;
+}
+
+.tray {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 0;
+  height: 1.2cqw;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 1.2cqw;
+  padding: 0 2cqw 0.3cqw;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.tray i { display: block; height: 0.7cqw; border-radius: 0.3cqw; }
+.tray i:nth-child(1) { width: 3.4cqw; background: var(--chalk); }
+.tray i:nth-child(2) { width: 2.6cqw; background: var(--yellow); }
+.tray i:nth-child(3) { width: 2cqw; background: #ffb3c7; }
+
+/* ===== 8：締め ===== */
+.s8 {
+  color: var(--white);
+  background:
+    radial-gradient(50% 70% at 15% 85%, rgba(255, 210, 63, 0.5), transparent 70%),
+    linear-gradient(135deg, var(--pink), var(--orange));
+}
+
+.s8 .pill { color: var(--pink); }
+.s8 .big { font-size: 6.4cqw; font-weight: 700; }
+
+.s8 .sign {
+  margin: 1.6cqw 0 0;
+  font-size: 1.9cqw;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+}
+
+.s8 .sign b {
+  display: block;
+  font-size: 3.4cqw;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.s8 .hanamaru {
+  position: absolute;
+  right: 7%;
+  top: 10%;
+  width: 12cqw;
+  height: 12cqw;
+}
+
+.s8 .hanamaru path { stroke: var(--white); stroke-width: 2.4; }
+
+/* ===== 操作ボタン ===== */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--page);
+  background: var(--yellow);
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 18px;
+  cursor: pointer;
+}
+
+.controls button.ghost {
+  background: transparent;
+  color: var(--page-fg);
+  box-shadow: inset 0 0 0 1px rgba(238, 240, 255, 0.4);
+}
+
+.controls button:focus-visible,
+.bar:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 3px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 120px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(238, 240, 255, 0.18);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar span {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+  background: linear-gradient(90deg, var(--mint), var(--c1), var(--c2), var(--pink), var(--yellow));
+}
+
+.time {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(238, 240, 255, 0.75);
+  min-width: 84px;
+  text-align: right;
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(238, 240, 255, 0.6);
+}
+
+/* ===== アニメーション ===== */
+@keyframes up {
+  from { opacity: 0; transform: translateY(2.4cqw); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes zoom {
+  0%   { opacity: 0; transform: scale(0.3); }
+  70%  { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50%      { transform: translateY(-1.2cqw) rotate(8deg); }
+}
+
+@keyframes rows {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes strike {
+  to { transform: rotate(-35deg) scaleX(1); }
+}
+
+@keyframes fadeTile {
+  to { opacity: 0.35; }
+}
+
+@keyframes slide {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes speedLine {
+  from { left: 100%; }
+  to   { left: -10cqw; }
+}
+
+@keyframes ground {
+  to { background-position: -6cqw 0; }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(2px); }
+  50%      { transform: translateY(-9px); }
+}
+
+@keyframes thigh {
+  0%   { transform: rotate(40deg); }
+  25%  { transform: rotate(-5deg); }
+  50%  { transform: rotate(-70deg); }
+  72%  { transform: rotate(-30deg); }
+  100% { transform: rotate(40deg); }
+}
+
+@keyframes shin {
+  0%   { transform: rotate(15deg); }
+  25%  { transform: rotate(125deg); }
+  50%  { transform: rotate(85deg); }
+  72%  { transform: rotate(15deg); }
+  100% { transform: rotate(15deg); }
+}
+
+@keyframes arm {
+  0%, 100% { transform: rotate(-65deg); }
+  50%      { transform: rotate(55deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage *,
+  .stage *::before,
+  .stage *::after {
+    animation: none !important;
+  }
+
+  .tiles .out { opacity: 0.35; }
+  .tiles .out::after { transform: rotate(-35deg); }
+}
+
+@media (max-width: 600px) {
+  .stage { border-radius: 8px; }
+  .time { min-width: 0; }
+}
+</style>
+
+<div class="wrap">
+  <h1 class="page-title">中村悠希 自己紹介ムービー<span>30秒</span></h1>
+
+  <div class="stage" id="stage" data-scene="1" role="img" aria-label="中村悠希の30秒の自己紹介ムービー。熊本大学教育学部小学校専攻3年、20歳。単発アルバイトで約80か所の現場を経験。強みは柔軟さ・対応力・好奇心。好きなことはランニングと謎解き。">
+
+    <!-- 1 オープニング（0〜3.5秒） -->
+    <section class="scene s1">
+      <span class="shape circle"></span><span class="shape ring"></span><span class="shape tri"></span>
+      <svg class="hanamaru" viewBox="0 0 100 100" aria-hidden="true">
+        <path pathLength="1" d="M46 50 a4 4 0 1 1 8 0 a8 8 0 1 1 -16 0 a12 12 0 1 1 24 0 a16 16 0 1 1 -32 0 a20 20 0 1 1 40 0 a24 24 0 1 1 -48 0"/>
+        <path class="petal" pathLength="1" d="M88 50 A16 16 0 0 1 76.87 76.87 A16 16 0 0 1 50 88 A16 16 0 0 1 23.13 76.87 A16 16 0 0 1 12 50 A16 16 0 0 1 23.13 23.13 A16 16 0 0 1 50 12 A16 16 0 0 1 76.87 23.13 A16 16 0 0 1 88 50"/>
+      </svg>
+      <div>
+        <p class="hello in" style="--d:0.3s">はじめまして！</p>
+        <p class="big in" style="--d:0.8s">中村 悠希</p>
+        <p class="roman in" style="--d:1.3s">HARUKI NAKAMURA</p>
+      </div>
+    </section>
+
+    <!-- 2 所属（3.5〜7秒） -->
+    <section class="scene s2">
+      <span class="pill in">1時間目　自己紹介</span>
+      <p class="big in" style="--d:0.3s">熊本大学 教育学部</p>
+      <p class="major in" style="--d:0.7s">小学校専攻　3年</p>
+      <p class="age in zoom" style="--d:1.3s"><span>20<small>歳</small></span></p>
+    </section>
+
+    <!-- 3 80か所（7〜12秒） -->
+    <section class="scene s3">
+      <div>
+        <span class="pill in">挑戦したこと</span>
+        <p class="count in" style="--d:0.2s"><span id="count">80</span><span class="count-unit">か所</span></p>
+        <p class="sub in" style="--d:0.4s">単発アルバイトで経験した現場（約）</p>
+      </div>
+      <div class="dots" aria-hidden="true"></div>
+      <p class="foot in" style="--d:2.6s">飲食店を中心に、<b>新しい現場へ</b>飛び込んできました。</p>
+    </section>
+
+    <!-- 4 強み（12〜15.5秒） -->
+    <section class="scene s4">
+      <p class="big in">わたしの強み</p>
+      <div class="cards">
+        <div class="card in zoom" style="--d:0.4s"><b>柔軟さ</b><span>店ごとのやり方に<br>すぐ合わせる</span></div>
+        <div class="card in zoom" style="--d:0.8s"><b>対応力</b><span>忙しい時間帯も<br>落ち着いて動ける</span></div>
+        <div class="card in zoom" style="--d:1.2s"><b>好奇心</b><span>「どんな仕事だろう」と<br>わくわくする</span></div>
+      </div>
+    </section>
+
+    <!-- 5 ランニング（15.5〜19秒） -->
+    <section class="scene s5">
+      <div class="run-text" aria-hidden="true">KEEP RUNNING ・ KEEP RUNNING ・ KEEP RUNNING ・ KEEP RUNNING ・</div>
+      <span class="pill in">好きなこと 01</span>
+      <p class="big in" style="--d:0.2s">ランニング</p>
+      <p class="sub in" style="--d:0.5s">コツコツ続ける力を育てています</p>
+      <div class="run-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+      <svg class="runner" viewBox="0 0 120 140" aria-hidden="true">
+        <g class="body-bob">
+          <g class="arm arm-b back">
+            <line x1="65" y1="42" x2="64" y2="59"/>
+            <line x1="64" y1="59" x2="77" y2="52"/>
+          </g>
+          <g class="leg leg-b back">
+            <line x1="56" y1="74" x2="56" y2="99"/>
+            <g class="shin">
+              <line x1="56" y1="99" x2="56" y2="122"/>
+              <line x1="56" y1="122" x2="64" y2="122"/>
+            </g>
+          </g>
+          <line class="torso" x1="67" y1="38" x2="56" y2="74"/>
+          <circle class="head" cx="73" cy="24" r="10"/>
+          <g class="leg leg-a">
+            <line x1="56" y1="74" x2="56" y2="99"/>
+            <g class="shin">
+              <line x1="56" y1="99" x2="56" y2="122"/>
+              <line x1="56" y1="122" x2="64" y2="122"/>
+            </g>
+          </g>
+          <g class="arm arm-a">
+            <line x1="65" y1="42" x2="64" y2="59"/>
+            <line x1="64" y1="59" x2="77" y2="52"/>
+          </g>
+        </g>
+      </svg>
+      <div class="ground" aria-hidden="true"></div>
+    </section>
+
+    <!-- 6 謎解き（19〜23.5秒） -->
+    <section class="scene s6">
+      <span class="pill in">好きなこと 02　謎解き</span>
+      <p class="q in" style="--d:0.2s"><span class="q-num">問1</span>下の文字が表す、私の気持ちは？</p>
+      <div class="tiles in" style="--d:0.4s">
+        <span>げ</span><span class="out">た</span><span>ん</span><span>ば</span><span class="out">た</span><span>が</span><span>す</span><span class="out">た</span><span>き</span>
+      </div>
+      <p class="answer in" style="--d:2.4s">「た」をぬくと…　<em>げんばがすき＝現場が好き！</em></p>
+      <svg class="hanamaru" viewBox="0 0 100 100" aria-hidden="true" style="--d:3s">
+        <path pathLength="1" d="M46 50 a4 4 0 1 1 8 0 a8 8 0 1 1 -16 0 a12 12 0 1 1 24 0 a16 16 0 1 1 -32 0 a20 20 0 1 1 40 0 a24 24 0 1 1 -48 0"/>
+        <path class="petal" pathLength="1" d="M88 50 A16 16 0 0 1 76.87 76.87 A16 16 0 0 1 50 88 A16 16 0 0 1 23.13 76.87 A16 16 0 0 1 12 50 A16 16 0 0 1 23.13 23.13 A16 16 0 0 1 50 12 A16 16 0 0 1 76.87 23.13 A16 16 0 0 1 88 50"/>
+      </svg>
+    </section>
+
+    <!-- 7 座右の銘（23.5〜26.5秒） -->
+    <section class="scene s7">
+      <div class="board">
+        <p class="board-label">座右の銘</p>
+        <p class="line in" style="--d:0.3s">人の目を気にしていたら、</p>
+        <p class="line in" style="--d:1s">一生<em>自分の人生</em>は始まらない。</p>
+        <div class="tray" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+    </section>
+
+    <!-- 8 締め（26.5〜30秒） -->
+    <section class="scene s8">
+      <svg class="hanamaru" viewBox="0 0 100 100" aria-hidden="true" style="--d:1.6s">
+        <path pathLength="1" d="M46 50 a4 4 0 1 1 8 0 a8 8 0 1 1 -16 0 a12 12 0 1 1 24 0 a16 16 0 1 1 -32 0 a20 20 0 1 1 40 0 a24 24 0 1 1 -48 0"/>
+        <path class="petal" pathLength="1" d="M88 50 A16 16 0 0 1 76.87 76.87 A16 16 0 0 1 50 88 A16 16 0 0 1 23.13 76.87 A16 16 0 0 1 12 50 A16 16 0 0 1 23.13 23.13 A16 16 0 0 1 50 12 A16 16 0 0 1 76.87 23.13 A16 16 0 0 1 88 50"/>
+      </svg>
+      <span class="pill in">放課後</span>
+      <p class="big in" style="--d:0.3s">次の現場は、<br>あなたの会社で。</p>
+      <p class="sign in" style="--d:1.2s">熊本大学 教育学部 小学校専攻 3年<b>中村 悠希</b></p>
+    </section>
+  </div>
+
+  <div class="controls">
+    <button type="button" id="play">一時停止</button>
+    <button type="button" id="replay" class="ghost">最初から</button>
+    <div class="bar" id="bar" role="slider" tabindex="0" aria-label="再生位置" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0"><span></span></div>
+    <span class="time" id="time">0:00 / 0:30</span>
+    <button type="button" id="full" class="ghost">全画面</button>
+  </div>
+  <p class="note">30秒でくり返し再生されます。動画ファイルにしたいときは、「全画面」にしてから Windows の画面録画（Win + Alt + R）で保存できます。</p>
+</div>
+
+<script>
+(function () {
+  var TOTAL = 30;
+  // 各場面の始まりの秒数
+  var STARTS = [0, 3.5, 7, 12, 15.5, 19, 23.5, 26.5];
+
+  var stage = document.getElementById('stage');
+  var playBtn = document.getElementById('play');
+  var bar = document.getElementById('bar');
+  var timeEl = document.getElementById('time');
+  var countEl = document.getElementById('count');
+
+  var t = 0;
+  var playing = true;
+  var last = null;
+  var current = 1;
+
+  function sceneAt(sec) {
+    var s = 1;
+    for (var i = 0; i < STARTS.length; i++) {
+      if (sec >= STARTS[i]) s = i + 1;
+    }
+    return s;
+  }
+
+  function fmt(sec) {
+    var s = Math.floor(sec);
+    return '0:' + (s < 10 ? '0' : '') + s;
+  }
+
+  // 場面を最初からやり直す（同じ場面でもアニメーションを再スタート）
+  function restart() {
+    stage.dataset.scene = '0';
+    void stage.offsetWidth;
+    current = 0;
+  }
+
+  function render() {
+    var s = sceneAt(t);
+    if (s !== current) {
+      stage.dataset.scene = String(s);
+      current = s;
+    }
+    // 80か所のカウントアップ
+    if (s === 3) {
+      var k = Math.min(1, Math.max(0, (t - STARTS[2] - 0.3) / 1.8));
+      countEl.textContent = Math.round(80 * (1 - Math.pow(1 - k, 3)));
+    }
+    bar.style.setProperty('--p', (t / TOTAL).toFixed(4));
+    bar.setAttribute('aria-valuenow', Math.floor(t));
+    timeEl.textContent = fmt(t) + ' / 0:30';
+  }
+
+  function frame(now) {
+    if (playing) {
+      if (last !== null) t += (now - last) / 1000;
+      last = now;
+      if (t >= TOTAL) {
+        t = 0;
+        restart();
+      }
+    } else {
+      last = null;
+    }
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  function setPlaying(p) {
+    playing = p;
+    stage.classList.toggle('paused', !p);
+    playBtn.textContent = p ? '一時停止' : '再生';
+  }
+
+  function seek(sec) {
+    t = Math.min(TOTAL - 0.01, Math.max(0, sec));
+    restart();
+    render();
+    setPlaying(true);
+  }
+
+  playBtn.addEventListener('click', function () { setPlaying(!playing); });
+  document.getElementById('replay').addEventListener('click', function () { seek(0); });
+
+  bar.addEventListener('click', function (e) {
+    var r = bar.getBoundingClientRect();
+    seek((e.clientX - r.left) / r.width * TOTAL);
+  });
+
+  bar.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { seek(t + 2); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { seek(t - 2); e.preventDefault(); }
+  });
+
+  document.getElementById('full').addEventListener('click', function () {
+    try {
+      var p = stage.requestFullscreen && stage.requestFullscreen();
+      if (p && p.catch) p.catch(function () {});
+    } catch (err) {}
+  });
+
+  document.addEventListener('visibilitychange', function () { last = null; });
+
+  restart();
+  render();
+  requestAnimationFrame(frame);
+})();
+</script>
