@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>アニマルレース</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="sky-day">
+  <!-- 空の飾り（昼は太陽、夕焼けは夕日、夜は月と星） -->
+  <div class="sky-deco" aria-hidden="true"><span class="sun"></span><span class="moon"></span><span class="stars"></span></div>
+
+  <!-- 1. タイトル -->
+  <section id="s-title" class="screen active">
+    <h1 class="logo">🐢🐕🐈🐆🦊<br>アニマルレース</h1>
+    <div class="menu">
+      <button id="btn-create" class="btn big" disabled title="通信で遊ぶモードは、サイト版で遊べます">部屋を作る</button>
+      <button id="btn-join" class="btn big" disabled title="通信で遊ぶモードは、サイト版で遊べます">部屋に入る</button>
+      <button class="btn big primary" data-go="setup">ひとりで練習</button>
+      <button class="btn big" data-go="howto">遊び方</button>
+    </div>
+    <div class="row">
+      <button class="btn small sound-toggle" data-sound="sfx" aria-label="効果音"></button>
+      <button class="btn small sound-toggle" data-sound="bgm" aria-label="BGM"></button>
+    </div>
+  </section>
+
+  <!-- ひとりで練習の準備 -->
+  <section id="s-setup" class="screen">
+    <h2>ひとりで練習</h2>
+    <div class="setup-grid">
+      <label>なまえ <input id="in-name" maxlength="8" value="あなた"></label>
+      <div>マーク <div id="mark-pick" class="chips"></div></div>
+      <div>CPUの人数 <div id="cpu-pick" class="chips"></div></div>
+      <div>レース数 <div id="race-pick" class="chips"></div></div>
+      <div>速さ <div id="speed-pick" class="chips"></div></div>
+    </div>
+    <div class="row">
+      <button class="btn" data-go="title">もどる</button>
+      <button id="btn-start" class="btn primary big">スタート</button>
+    </div>
+  </section>
+
+  <!-- 2. 通信で遊ぶ：名前とマーク（部屋に入るときは部屋番号も） -->
+  <section id="s-online" class="screen">
+    <h2 id="online-title">部屋を作る</h2>
+    <div class="setup-grid">
+      <label>なまえ <input id="in-online-name" maxlength="8" placeholder="なまえ"></label>
+      <div>マーク <div id="online-mark-pick" class="chips"></div></div>
+      <label id="room-code-row">部屋番号 <input id="in-room-code" inputmode="numeric" maxlength="4" placeholder="1234"></label>
+    </div>
+    <p id="online-msg" class="explain"></p>
+    <div class="row">
+      <button class="btn" data-go="title">もどる</button>
+      <button id="btn-online-go" class="btn primary big">部屋を作る</button>
+    </div>
+  </section>
+
+  <!-- 3. 部屋（待合室） -->
+  <section id="s-room" class="screen">
+    <div class="room-grid">
+      <div class="room-left">
+        <div class="room-label">部屋番号</div>
+        <div id="room-code" class="room-code"></div>
+        <button id="btn-share" class="btn primary">🔗 リンクを送る</button>
+        <div>レース数 <div id="room-races" class="chips"></div></div>
+      </div>
+      <div class="room-right">
+        <div id="room-players" class="room-players"></div>
+        <p id="room-note" class="explain"></p>
+      </div>
+    </div>
+    <div class="row">
+      <button id="btn-room-leave" class="btn">部屋を出る</button>
+      <button id="btn-room-start" class="btn primary big hidden">スタート</button>
+    </div>
+  </section>
+
+  <!-- 3. 遊び方 -->
+  <section id="s-howto" class="screen">
+    <div id="howto-page" class="howto"></div>
+    <div class="row">
+      <button id="howto-prev" class="btn">◀</button>
+      <button class="btn" data-go="title">タイトルへ</button>
+      <button id="howto-next" class="btn">▶</button>
+    </div>
+  </section>
+
+  <!-- 4・7. レース（レーン発表もこの画面で行う） -->
+  <section id="s-race" class="screen">
+    <header class="race-top">
+      <span id="race-no" class="pill"></span>
+      <span id="turn-info" class="turn-info"></span>
+      <span id="streak-info" class="pill"></span>
+      <span id="timer" class="timer"></span>
+      <button id="btn-log" class="btn small" aria-label="メニュー（記録・特別カード・音・やめる）">≡</button>
+    </header>
+    <div class="ticker-row">
+      <div id="ticker" class="ticker"></div>
+      <span id="players-bar" class="players-bar"></span>
+    </div>
+    <div id="lanes" class="lanes"></div>
+    <footer class="hand-area">
+      <div id="hand" class="hand"></div>
+      <div id="my-bets" class="my-bets"></div>
+      <div class="hand-actions">
+        <button id="btn-bulk" class="btn small hidden">まとめて出す</button>
+        <button id="btn-play" class="btn primary" disabled>出す</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- 5・8. ベット（一斉の追加ベットも同じ画面） -->
+  <section id="s-bet" class="screen">
+    <header class="bet-top">
+      <span id="bet-title" class="bet-title"></span>
+      <span id="bet-steps" class="bet-steps"></span>
+      <span id="bet-timer" class="timer"></span>
+      <span id="bet-chips" class="pill"></span>
+    </header>
+    <div id="bet-standings" class="bet-standings"></div>
+    <div id="bet-body" class="bet-body"></div>
+    <footer class="bet-bottom">
+      <div id="bet-tickets" class="bet-tickets"></div>
+      <button id="btn-bet-skip" class="btn hidden">賭けない</button>
+      <button id="btn-bet-done" class="btn primary">賭け終わる</button>
+    </footer>
+  </section>
+
+  <!-- 6. ベット公開・倍率発表 -->
+  <section id="s-reveal" class="screen">
+    <h2 id="reveal-title">みんなの賭けと倍率</h2>
+    <div id="reveal-body" class="table-wrap"></div>
+    <div class="row"><button id="btn-reveal-go" class="btn primary big">レース開始！</button></div>
+  </section>
+
+  <!-- 9. 結果 -->
+  <section id="s-result" class="screen">
+    <h2 id="result-title"></h2>
+    <div class="result-grid">
+      <div id="result-order" class="result-order"></div>
+      <div id="result-table" class="table-wrap"></div>
+    </div>
+    <div class="row"><button id="btn-result-go" class="btn primary big"></button></div>
+  </section>
+
+  <!-- 小窓（対象を選ぶ・特別カードの公開・ネコの結果・記録） -->
+  <div id="modal" class="modal hidden"><div id="modal-box" class="modal-box"></div></div>
+  <!-- メニュー（≡）と相手の賭けは、ゲームの小窓とは別の窓に出す（演出で勝手に閉じないように） -->
+  <div id="menu" class="modal menu-layer hidden"><div id="menu-box" class="modal-box"></div></div>
+  <div id="fx" class="fx"></div>
+  <div id="net-status" class="net-status hidden">📴 通信が切れています。つながり直すのを待っています…</div>
+  <div id="rotate" class="rotate">📱↻<br>スマホを横にしてね</div>
+</div>
+
+<!-- 通信で遊ぶ（Firebase）。読みこめなくても、ひとりで練習は遊べる -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="net.js"></script>
+<script src="engine.js"></script>
+<script src="betting.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

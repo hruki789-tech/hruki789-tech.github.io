@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null",
+        ".validate": "$code.matches(/^[0-9]{4}$/)",
+        "meta": {
+          ".write": "auth != null && (!data.exists() || data.child('host').val() === auth.uid || data.child('createdAt').val() < now - 86400000)"
+        },
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+        "steps": {
+          "$gid": {
+            "$key": {
+              ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid"
+            }
+          }
+        }
+      }
+    }
+  }
+}

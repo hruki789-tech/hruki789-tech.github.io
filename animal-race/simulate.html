@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アニマルレース シミュレーション</title>
+<style>
+  body { font-family: sans-serif; margin: 16px; background: #fff; color: #222; }
+  table { border-collapse: collapse; margin: 8px 0 20px; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  h2 { margin-top: 28px; }
+</style>
+</head>
+<body>
+<h1>アニマルレース シミュレーション</h1>
+<p>回数：<input id="games" type="number" value="20000" min="100" step="1000">（人数ごと）
+  <button id="run">実行</button> <span id="progress"></span></p>
+<div id="out"></div>
+
+<script src="engine.js"></script>
+<script src="betting.js"></script>
+<script>
+const { ANIMALS, LANES, makeRng, shuffle, playGame } = AnimalRace;
+const PLAYER_COUNTS = [2, 3, 4, 5];
+
+function emptyResult() {
+  return {
+    games: 0, plays: 0, stalled: 0,
+    rank: ANIMALS.map(() => [0, 0, 0, 0, 0]),
+    laneRank: ANIMALS.map(() => LANES.map(() => [0, 0, 0, 0, 0])),
+    laneGames: ANIMALS.map(() => LANES.map(() => 0)),
+    bets: 0, win: 0, exacta: 0, trifecta: 0,
+    special: {}, actions: {}, reshuffles: 0,
+  };
+}
+
+function record(r, n, targets, g) {
+  r.games++;
+  r.plays += g.plays;
+  if (g.stalled) r.stalled++;
+  r.reshuffles += g.stats.reshuffles;
+  g.order.forEach((a, rank) => {
+    r.rank[a][rank]++;
+    r.laneRank[a][g.laneOf[a]][rank]++;
+  });
+  ANIMALS.forEach((_, a) => r.laneGames[a][g.laneOf[a]]++);
+  targets.forEach(t => {
+    r.bets++;
+    if (g.order[0] === t[0]) r.win++;
+    if (g.order[0] === t[0] && g.order[1] === t[1]) r.exacta++;
+    if (g.order[0] === t[0] && g.order[1] === t[1] && g.order[2] === t[2]) r.trifecta++;
+  });
+  for (const [k, v] of Object.entries(g.stats.special)) r.special[k] = (r.special[k] || 0) + v;
+  for (const [k, v] of Object.entries(g.stats.actions)) r.actions[k] = (r.actions[k] || 0) + v;
+}
+
+function randomTarget(rng) {
+  return shuffle([0, 1, 2, 3, 4], rng).slice(0, 3);
+}
+
+async function runAll(games) {
+  const rng = makeRng(20261024);
+  const results = {};
+  for (const n of PLAYER_COUNTS) {
+    const r = emptyResult();
+    for (let i = 0; i < games; i++) {
+      const targets = Array.from({ length: n }, () => randomTarget(rng));
+      record(r, n, targets, playGame(n, rng, targets));
+      if (i % 500 === 0) {
+        document.getElementById('progress').textContent = `${n}人：${i} / ${games}`;
+        await new Promise(res => setTimeout(res));
+      }
+    }
+    results[n] = r;
+  }
+  document.getElementById('progress').textContent = '完了';
+  return results;
+}
+
+const pct = (x, total) => (100 * x / total).toFixed(1) + '%';
+const meanRank = arr => {
+  const total = arr.reduce((a, b) => a + b, 0);
+  return total ? (arr.reduce((s, c, i) => s + c * (i + 1), 0) / total).toFixed(2) : '-';
+};
+
+function render(results) {
+  let html = '';
+
+  html += '<h2>1. 人数ごとの基本データ</h2><table><tr><th>人数</th><th>1レースの手番数</th><th>1人あたりの手番数</th><th>山札の作り直し</th><th>止まったレース</th></tr>';
+  for (const n of PLAYER_COUNTS) {
+    const r = results[n];
+    html += `<tr><td>${n}人</td><td>${(r.plays / r.games).toFixed(1)}</td><td>${(r.plays / r.games / n).toFixed(1)}</td>`
+      + `<td>${(r.reshuffles / r.games).toFixed(2)}回</td><td>${r.stalled}</td></tr>`;
+  }
+  html += '</table>';
+
+  for (const n of PLAYER_COUNTS) {
+    const r = results[n];
+    html += `<h2>2. 動物ごとの順位の確率（${n}人）</h2><table><tr><th>動物</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th><th>5位</th><th>平均順位</th></tr>`;
+    ANIMALS.forEach((name, a) => {
+      html += `<tr><td>${name}</td>` + r.rank[a].map(c => `<td>${pct(c, r.games)}</td>`).join('') + `<td>${meanRank(r.rank[a])}</td></tr>`;
+    });
+    html += '</table>';
+  }
+
+  const all = emptyResult();
+  for (const n of PLAYER_COUNTS) {
+    const r = results[n];
+    all.games += r.games;
+    ANIMALS.forEach((_, a) => LANES.forEach((_, l) => {
+      all.laneGames[a][l] += r.laneGames[a][l];
+      r.laneRank[a][l].forEach((c, k) => { all.laneRank[a][l][k] += c; });
+    }));
+  }
+  html += '<h2>3. 動物×レーンの1位の確率（全人数の合計）</h2><table><tr><th>動物</th>'
+    + LANES.map(l => `<th>${l.name}(${l.len})</th>`).join('') + '</tr>';
+  ANIMALS.forEach((name, a) => {
+    html += `<tr><td>${name}</td>` + LANES.map((_, l) => `<td>${pct(all.laneRank[a][l][0], all.laneGames[a][l])}</td>`).join('') + '</tr>';
+  });
+  html += '</table>';
+  html += '<h2>4. 動物×レーンの平均順位（全人数の合計）</h2><table><tr><th>動物</th>'
+    + LANES.map(l => `<th>${l.name}(${l.len})</th>`).join('') + '</tr>';
+  ANIMALS.forEach((name, a) => {
+    html += `<tr><td>${name}</td>` + LANES.map((_, l) => `<td>${meanRank(all.laneRank[a][l])}</td>`).join('') + '</tr>';
+  });
+  html += '</table>';
+
+  html += '<h2>5. 賭けの的中率（作戦の効果）</h2><table><tr><th>人数</th><th>1位的中</th><th>1・2位的中（順番通り）</th><th>1〜3位的中（順番通り）</th></tr>';
+  html += '<tr><td>運だけの場合</td><td>20.0%</td><td>5.0%</td><td>1.7%</td></tr>';
+  for (const n of PLAYER_COUNTS) {
+    const r = results[n];
+    html += `<tr><td>${n}人</td><td>${pct(r.win, r.bets)}</td><td>${pct(r.exacta, r.bets)}</td><td>${pct(r.trifecta, r.bets)}</td></tr>`;
+  }
+  html += '</table>';
+
+  const ACTION_NAMES = { move: '一般カードで進む', dud: 'ゴール済みのカードを捨てる', foxSwap: 'キツネの場所交代', all: '全部同じ動物でまとめて出す',
+    god: '神の助け', favor: 'えこひいき', swap: 'カード交換', rob: 'カード強盗' };
+  const SPECIAL_NAMES = { sweep: 'カード一掃', limitUp: 'カード増加', limitDown: 'カード減少' };
+  html += '<h2>6. 行動の回数（1レースあたり）</h2><table><tr><th>行動</th>' + PLAYER_COUNTS.map(n => `<th>${n}人</th>`).join('') + '</tr>';
+  for (const [k, name] of Object.entries(ACTION_NAMES)) {
+    html += `<tr><td>${name}</td>` + PLAYER_COUNTS.map(n => `<td>${((results[n].actions[k] || 0) / results[n].games).toFixed(2)}</td>`).join('') + '</tr>';
+  }
+  for (const [k, name] of Object.entries(SPECIAL_NAMES)) {
+    html += `<tr><td>${name}（発動）</td>` + PLAYER_COUNTS.map(n => `<td>${((results[n].special[k] || 0) / results[n].games).toFixed(2)}</td>`).join('') + '</tr>';
+  }
+  html += '</table>';
+
+  document.getElementById('out').innerHTML = html;
+  window.SIM_RESULTS = results;
+}
+
+// ルールを変えた候補の特徴を測る（開発者ツールや自動実行から呼び出す）
+//   1位・5位の確率、平均順位、順位のばらつき、1回で進む数、途中から順位が2つ以上変わる割合、キツネのズル
+window.profile = function (opts, n, games, seed) {
+  const o = Object.assign({}, AnimalRace.DEFAULT_OPTS, opts);
+  const rng = makeRng(seed || 5);
+  const rank = ANIMALS.map(() => [0, 0, 0, 0, 0]);
+  const mv = ANIMALS.map(() => ({ s: 0, s2: 0, c: 0 }));
+  const swing = [0, 0, 0, 0, 0];
+  let snaps = 0, plays = 0, foxTrick = 0, foxProg = 0, foxWin = 0, foxWinTrick = 0;
+  for (let g = 0; g < games; g++) {
+    const targets = Array.from({ length: n }, () => randomTarget(rng));
+    const res = playGame(n, rng, targets, o);
+    plays += res.plays;
+    res.order.forEach((a, r) => rank[a][r]++);
+    res.stats.moves.forEach((arr, a) => arr.forEach(x => { mv[a].s += x; mv[a].s2 += x * x; mv[a].c++; }));
+    if (res.stats.midOrder) {
+      snaps++;
+      res.stats.midOrder.forEach((a, r) => { if (Math.abs(res.order.indexOf(a) - r) >= 2) swing[a]++; });
+    }
+    foxTrick += res.stats.foxTrick;
+    foxProg += o.lanes[res.laneOf[4]];
+    if (res.order[0] === 4) { foxWin++; if (res.stats.foxTrick > 0) foxWinTrick++; }
+  }
+  const f = (x, d = 1) => +x.toFixed(d);
+  const animals = ANIMALS.map((name, a) => {
+    const rk = rank[a].map(c => c / games);
+    const mean = rk.reduce((s, p, i) => s + p * (i + 1), 0);
+    const sd = Math.sqrt(rk.reduce((s, p, i) => s + p * (i + 1 - mean) ** 2, 0));
+    const m = mv[a].s / mv[a].c;
+    return {
+      name, p1: f(rk[0] * 100), p5: f(rk[4] * 100), mean: f(mean, 2), sd: f(sd, 2),
+      mv: f(m), mvSD: f(Math.sqrt(mv[a].s2 / mv[a].c - m * m)), playsPerRace: f(mv[a].c / games),
+      swing: f(swing[a] / snaps * 100),
+    };
+  });
+  return {
+    n, plays: f(plays / games), animals,
+    foxTrickShare: f(foxTrick / foxProg * 100), foxWinWithTrick: f(foxWin ? foxWinTrick / foxWin * 100 : 0),
+  };
+};
+
+// 払い戻しを試算する（最初のベット → レース → 一斉の追加ベット → 払い戻し）
+// プレイヤーの賭け方の前提：
+//   ・賭け方の好みは3種類からランダム（堅実：単勝・複勝・ワイド、ふつう：馬連・馬単・3連複、大穴：3連単・馬単）
+//   ・最初のベットは「最低枚数・持ち物の25%・50%・全部」のどれかをランダムに選び、自分の予想で1枚の券を買う
+//   ・1位の動物が残り lateAt マスを越えたら、lateProb の確率で、残りの25%か50%を
+//     その時点の上位の動物に1枚だけ追加で賭ける
+//   ・券種×人気×（最初／追加）ごとの的中率も集計する（倍率表を作るため）
+const STYLES = [['win', 'place', 'wide'], ['quinella', 'exacta', 'trio'], ['trifecta', 'exacta']];
+const pickFor = (type, order) => order.slice(0, AnimalBetting.TYPES[type].picks);
+
+window.betSim = function (cfg, n, games, seed) {
+  const rng = makeRng(seed || 7);
+  const o = Object.assign({}, AnimalRace.DEFAULT_OPTS, { lateAt: cfg.lateAt }, cfg.race);
+  const S = cfg.start;
+  const r = { players: 0, big: 0, half: 0, bust: 0, bank: 0, early: [0, 0], late: [0, 0], winnerChips: 0, hit: {}, latePlays: 0 };
+  for (let g = 0; g < games; g++) {
+    const targets = Array.from({ length: n }, () => randomTarget(rng));
+    const styles = targets.map(() => STYLES[Math.floor(rng() * STYLES.length)]);
+    const chips = targets.map(() => S);
+    const tickets = [];
+    targets.forEach((t, p) => {
+      const f = [0, 0.25, 0.5, 1][Math.floor(rng() * 4)];
+      const stake = Math.min(S, Math.max(cfg.minBet, Math.round(S * f)));
+      const type = styles[p][Math.floor(rng() * styles[p].length)];
+      tickets.push({ player: p, type, pick: pickFor(type, t), stake, late: false });
+      chips[p] -= stake;
+    });
+    const res = playGame(n, rng, targets, o);
+    const lateOrder = res.stats.lateOrder || res.order;
+    r.latePlays += res.stats.latePlays || res.plays;
+    targets.forEach((_, p) => {
+      if (rng() >= cfg.lateProb) return;
+      const stake = Math.floor(chips[p] * (rng() < 0.5 ? 0.25 : 0.5));
+      if (stake < 1) return;
+      const type = styles[p][Math.floor(rng() * styles[p].length)];
+      tickets.push({ player: p, type, pick: pickFor(type, lateOrder), stake, late: true });
+      chips[p] -= stake;
+    });
+    const s = AnimalBetting.settle(tickets, res.order, cfg);
+    tickets.forEach((t, i) => {
+      chips[t.player] += s.payouts[i];
+      const k = t.late ? 'late' : 'early';
+      r[k][0] += t.stake; r[k][1] += s.payouts[i];
+      const key = `${t.type}|${Math.min(s.pops[i], 3)}|${k}`;
+      const h = r.hit[key] || (r.hit[key] = [0, 0]);
+      h[0]++;
+      if (AnimalBetting.isHit(t.type, t.pick, res.order)) h[1]++;
+    });
+    r.bank += s.bank;
+    chips.forEach(c => {
+      r.players++;
+      if (c >= 2 * S) r.big++;
+      if (c <= 0.5 * S) r.half++;
+      if (c === 0) r.bust++;
+    });
+    r.winnerChips += Math.max(...chips);
+  }
+  const pct = x => +(100 * x / r.players).toFixed(1);
+  return {
+    big: pct(r.big), half: pct(r.half), bust: pct(r.bust),
+    bankPerRace: +(r.bank / games).toFixed(1),
+    winnerAvg: +(r.winnerChips / games).toFixed(0),
+    roiEarly: +(r.early[1] / r.early[0]).toFixed(2), roiLate: r.late[0] ? +(r.late[1] / r.late[0]).toFixed(2) : null,
+    latePlay: +(r.latePlays / games).toFixed(1),
+    hit: r.hit,
+  };
+};
+
+document.getElementById('run').addEventListener('click', async () => {
+  const games = Number(document.getElementById('games').value) || 20000;
+  window.SIM_DONE = false;
+  render(await runAll(games));
+  window.SIM_DONE = true;
+});
+</script>
+</body>
+</html>
