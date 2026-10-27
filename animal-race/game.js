@@ -823,17 +823,21 @@
       document.querySelector('.hand-area').classList.add('my-turn');
       turnBanner();
       Sound.sfx('turn');
+      // カード強盗を開いたら取り消せない。ほかのカードも選べなくなり、時間切れでもそのカード強盗を出す
+      let locked = null;
+      const lock = act => { locked = act; };
       const stopTimer = startTimer($('timer'), TURN_SEC, () => {
-        ticker('時間切れ！カードをランダムに出します');
-        finish(randomAction(p));
+        ticker(locked ? '時間切れ！カード強盗をランダムに使います' : '時間切れ！カードをランダムに出します');
+        finish(locked || randomAction(p));
       });
 
       const acts = R.boardActions(s, s.hands[p], s.opts);
       const bulk = acts.find(a => a.type === 'all');
       $('btn-bulk').classList.toggle('hidden', !bulk);
-      $('btn-bulk').onclick = () => finish(bulk);
+      $('btn-bulk').onclick = () => { if (!locked) finish(bulk); };
 
       const pick = i => {
+        if (locked) return;
         selected = i;
         renderHand(p, true, selected, pick);
         $('btn-play').disabled = false;
@@ -842,8 +846,8 @@
       renderHand(p, true, null, pick);
       $('btn-play').disabled = true;
       $('btn-play').onclick = () => {
-        if (selected == null) return;
-        chooseTarget(p, selected, finish);
+        if (selected == null || locked) return;
+        chooseTarget(p, selected, finish, lock);
       };
     });
   }
@@ -865,17 +869,20 @@
       ticker(`${animalLabel(c.animal)}は${c.lo}か${c.hi}マス${bonus ? `（＋連続${bonus}）` : ''}。出すまで分かりません`, true);
     } else {
       showGhost(null);
-      ticker(c.kind === 'foxSwap' ? '🦊キツネと好きな動物の、ゴールまでの残りマスを入れかえます' : `${SPECIAL[c.kind].name}：${SPECIAL[c.kind].desc}`, true);
+      ticker(c.kind === 'foxSwap' ? '🦊キツネと好きな動物の、ゴールまでの残りマスを入れかえます' : `${SPECIAL[c.kind].name}：${SPECIAL[c.kind].desc}${c.kind === 'rob' ? '。⚠️出すと取り消せません' : ''}`, true);
     }
   }
 
   // 対象を選ぶカードは小窓で選んでから出す
-  function chooseTarget(p, i, finish) {
+  // lock(act)：取り消せなくなったカードを伝える（時間切れのときは、そのカードをランダムな対象で出す）
+  function chooseTarget(p, i, finish, lock) {
     const s = G.s;
     const hand = s.hands[p];
     const c = hand[i];
-    const options = (title, items) => {
-      const box = openModal(`<h3>${title}</h3><div class="opts"></div><button class="btn small" data-cancel>やめる</button>`);
+    const options = (title, items, noCancel) => {
+      const box = openModal(`<h3>${title}</h3><div class="opts"></div>${noCancel
+        ? '<p class="explain">カード強盗は、出したら取り消せません</p>'
+        : '<button class="btn small" data-cancel>やめる</button>'}`);
       const opts = box.querySelector('.opts');
       items.forEach(({ label, act, next }) => {
         const b = document.createElement('button');
@@ -884,7 +891,7 @@
         b.addEventListener('click', () => (next ? next() : finish(act)));
         opts.appendChild(b);
       });
-      box.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      if (!noCancel) box.querySelector('[data-cancel]').addEventListener('click', closeModal);
     };
     const acts = R.boardActions(s, hand, s.opts).filter(a => a.i === i);
 
@@ -897,16 +904,23 @@
     } else if (c.kind === 'rob') {
       const rest = hand.filter((_, k) => k !== i);
       if (rest.length === 0) { ticker('渡すカードがないので使えません'); return; }
+      // 全員の手札が見えるので、開いたら取り消せない（のぞき見だけしてやめる、を防ぐ）。
+      // 時間切れなら、このカード強盗をランダムな相手・カードで出す
+      const others = G.players.map((_, q) => q).filter(q => q !== p && s.hands[q].length);
+      if (lock && others.length) {
+        const q = others[Math.floor(Math.random() * others.length)];
+        lock({ type: 'rob', i, q, j: Math.floor(Math.random() * s.hands[q].length), k: Math.floor(Math.random() * rest.length) });
+      }
       const items = [];
       G.players.forEach((pl, q) => {
         if (q === p) return;
         s.hands[q].forEach((take, j) => items.push({
           label: `${pl.mark}${pl.name}の ${shortCard(take)}`,
           next: () => options(`${shortCard(take)} のかわりに渡すカードは？`,
-            rest.map((give, k) => ({ label: shortCard(give), act: { type: 'rob', i, q, j, k } }))),
+            rest.map((give, k) => ({ label: shortCard(give), act: { type: 'rob', i, q, j, k } })), true),
         }));
       });
-      options('どのカードを取る？（全員の手札が見えます）', items);
+      options('どのカードを取る？（全員の手札が見えます）', items, true);
     } else {
       finish(acts[0]);
     }
